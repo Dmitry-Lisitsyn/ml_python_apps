@@ -36,7 +36,6 @@ async def init_consumer(
 
 
 async def close_consumer():
-    global consumer
     try:
         if consumer:
             await consumer.stop()
@@ -52,7 +51,6 @@ async def close_consumer():
 
 
 async def consume_llm_responses():
-    global consumer
     await consumer.start()
     try:
         async for msg in consumer:

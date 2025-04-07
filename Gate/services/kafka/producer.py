@@ -23,7 +23,6 @@ async def init_producer(bootstrap_servers: str = kafka_config.KAFKA_BROKER):
 
 
 async def close_producer():
-    global producer
     try:
         await producer.stop()
         logger.info(
