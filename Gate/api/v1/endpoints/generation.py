@@ -17,20 +17,20 @@ async def generate(gen_req: GenerationRequest, req: Request, producer: AIOKafkaP
     request_id = req.state.request_id
     logger.info(
         f"New generate request received: request_id={request_id}",
-        extra={"tags": {"service": "gate", "endpoint": "/generate"}},
+        extra={"tags": {"service": "gate", "endpoint": "/generation"}},
     )
 
     if cache_request := await redis_request.get_request(gen_req.prompt):
         logger.info(
             f"Cache hit for request_id={request_id}",
-            extra={"tags": {"service": "gate", "endpoint": "/generate"}}
+            extra={"tags": {"service": "gate", "endpoint": "/generation"}}
         )
         return cache_request
 
     await response.add_response(request_id)
     logger.info(
         f"Sending message to Kafka topic 'llm_prompts': 'request_id': {request_id}, 'prompt': {gen_req.prompt}",
-        extra={"tags": {"service": "gate", "endpoint": "/generate"}},
+        extra={"tags": {"service": "gate", "endpoint": "/generation"}},
     )
 
     try:
@@ -47,7 +47,7 @@ async def generate(gen_req: GenerationRequest, req: Request, producer: AIOKafkaP
     except Exception as e:
         logger.error(
             f"Failed to send message to Kafka topic 'llm_prompts': {e}",
-            extra={"tags": {"service": "gate", "endpoint": "/generate"}},
+            extra={"tags": {"service": "gate", "endpoint": "/generation"}},
         )
         raise
 
@@ -55,12 +55,12 @@ async def generate(gen_req: GenerationRequest, req: Request, producer: AIOKafkaP
     if updated_response:
         logger.info(
             f"Generate response completed: {updated_response}",
-            extra={"tags": {"service": "gate", "endpoint": "/generate"}},
+            extra={"tags": {"service": "gate", "endpoint": "/generation"}},
         )
         return updated_response
 
     logger.error(
         f"Timeout occurred for request_id={request_id}",
-        extra={"tags": {"service": "gate", "endpoint": "/generate"}},
+        extra={"tags": {"service": "gate", "endpoint": "/generation"}},
     )
     return {"result": "Request timed out", "status": "error", "request_id": request_id}
